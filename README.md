@@ -1,7 +1,4 @@
-<p align="center">Mini Bank <br><p align="center">
-
-
-## Description
+<h1>Mini Bank </h1>
 
 This project is a simplified banking system designed to implement core backend engineering concepts commonly used in production-grade financial systems. <br> The focus is not only on basic banking operations, but also important topics such as concurrency control, data consistency, and system reliability.
 
