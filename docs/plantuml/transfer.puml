@@ -1,0 +1,86 @@
+@startuml
+
+actor Customer
+
+participant "TransferController" as Controller
+participant "AuthGuard" as Auth
+participant "ValidationService" as Validation
+participant "TransferService" as Service
+participant "AccountRepository" as AccountRepo
+participant "DB Transaction Manager" as DB
+participant "AuditService" as Audit
+participant "Queue" as Queue
+
+Customer -> Controller: POST /transfer (to, amount)
+
+' ======================
+' AUTH PHASE
+' ======================
+Controller -> Auth: validate token
+Auth --> Controller: userId
+
+' ======================
+' VALIDATION PHASE
+' ======================
+Controller -> Validation: validate payload
+Validation --> Controller: OK
+
+Controller -> Service: transfer(userId, to, amount)
+
+' ======================
+' TRANSACTION START
+' ======================
+Service -> DB: BEGIN TRANSACTION
+
+' ======================
+' LOAD ACCOUNTS (WITH LOCK)
+' ======================
+Service -> AccountRepo: lock(fromAccount)
+AccountRepo --> Service: fromAccount
+
+Service -> AccountRepo: lock(toAccount)
+AccountRepo --> Service: toAccount
+
+' ======================
+' BUSINESS RULES CHECK
+' ======================
+Service -> Service: check account status
+Service -> Service: check balance >= amount
+
+alt insufficient balance
+    Service -> DB: ROLLBACK
+    Service --> Controller: error (INSUFFICIENT_FUNDS)
+    Controller --> Customer: 400 error
+else valid
+
+    ' ======================
+    ' UPDATE BALANCES
+    ' ======================
+    Service -> AccountRepo: debit(fromAccount, amount)
+    Service -> AccountRepo: credit(toAccount, amount)
+
+    ' ======================
+    ' WRITE TRANSACTION LOG
+    ' ======================
+    Service -> DB: insert transaction record
+
+    ' ======================
+    ' AUDIT LOGGING
+    ' ======================
+    Service -> Audit: log transfer event
+
+    ' ======================
+    ' COMMIT
+    ' ======================
+    Service -> DB: COMMIT
+
+    ' ======================
+    ' ASYNC SIDE EFFECTS
+    ' ======================
+    Service -> Queue: publish TransferCompletedEvent
+
+    Service --> Controller: success response
+    Controller --> Customer: 200 OK
+end
+
+@enduml

@@ -1,0 +1,48 @@
+@startuml
+
+actor Customer
+
+participant "WithdrawController" as Controller
+participant "AuthGuard" as Auth
+participant "ValidationService" as Validation
+participant "WithdrawService" as Service
+participant "AccountRepository" as AccountRepo
+participant "DB Transaction Manager" as DB
+participant "AuditService" as Audit
+
+Customer -> Controller: POST /withdraw (amount)
+
+Controller -> Auth: validate token
+Auth --> Controller: userId
+
+Controller -> Validation: validate request
+Validation --> Controller: OK
+
+Controller -> Service: withdraw(userId, amount)
+
+Service -> DB: BEGIN TRANSACTION
+
+Service -> AccountRepo: lock(account)
+AccountRepo --> Service: account
+
+Service -> Service: check balance
+
+alt insufficient balance
+    Service -> DB: ROLLBACK
+    Service --> Controller: error (INSUFFICIENT_FUNDS)
+    Controller --> Customer: 400 error
+else valid
+
+    Service -> AccountRepo: debit(account, amount)
+
+    Service -> DB: insert transaction record
+
+    Service -> Audit: log withdraw event
+
+    Service -> DB: COMMIT
+
+    Service --> Controller: success
+    Controller --> Customer: 200 OK
+end
+
+@enduml
