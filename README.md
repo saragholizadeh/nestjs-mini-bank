@@ -1,4 +1,4 @@
-<p align="center">Mini Bank <br> A simple banking system with NodeJs and PostgreSQL <p align="center">
+<p align="center">Mini Bank <br><p align="center">
 
 
 ## Description
