@@ -55,3 +55,86 @@ These diagrams show the main flows of the system and how its parts interact with
 
 *You can see diagrams and `puml` files of them in `/dos` directory.*
 
+## Project Structure
+
+The project follows a layered architecture with a clear separation between HTTP concerns, business logic, and infrastructure.
+
+```
+src/
+├── common/                   # Shared NestJS building blocks
+├── configs/                  # Environment-based configuration
+├── domain/                   # Core business rules
+│   └── banking-core/
+├── infrastructure/           # External system adapters
+│   ├── audit/
+│   ├── database/
+│   └── queue/
+├── modules/                  # HTTP feature modules
+│   ├── account/
+│   ├── auth/
+│   └── transaction/
+│       ├── deposit/
+│       ├── transfer/
+│       └── withdraw/
+└── main.ts
+```
+
+
+## API Reference
+
+> 🚧 Full API documentation will be added here once the endpoints are implemented.
+
+---
+
+## Data Model
+
+> 🚧 Entity relationship diagram and a description of key design decisions will be added here.
+
+---
+
+## Running the Project
+
+> 🚧 Setup and run instructions will be added here. Will cover:
+> - Prerequisites (Node.js version, Docker)
+> - Environment variable setup (`.env` example)
+> - Running with Docker Compose
+> - Running locally without Docker
+
+---
+
+## Database Migrations
+
+> 🚧 Instructions for running and writing TypeORM migrations will be added here.
+
+---
+
+## Testing
+
+> 🚧 Testing strategy and commands will be documented here. Will cover:
+> - Unit tests for domain logic (`banking-core`)
+> - Integration tests for API endpoints
+
+---
+
+## Deployment
+
+> 🚧 Deployment notes will be added here. Will cover environment configuration, Docker image build, and any production-specific concerns.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Runtime | Node.js |
+| Framework | NestJS |
+| Language | TypeScript |
+| Database | PostgreSQL |
+| ORM | TypeORM |
+| Queue | Bull (Redis) |
+| Auth | JWT / Passport |
+| Containerization | Docker |
+
+
+
+
