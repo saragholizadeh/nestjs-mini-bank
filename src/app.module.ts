@@ -7,9 +7,28 @@ import { AccountModule } from './modules/account/account.module';
 import { TransactionModule } from './modules/transaction/transaction.module';
 import { AuditModule } from './infrastructure/audit/audit.module';
 import { QueueModule } from './infrastructure/queue/queue.module';
+import { LoggerModule } from 'nestjs-pino';
 
 @Module({
-  imports: [AuthModule, BankingCoreModule, AccountModule, TransactionModule, AuditModule, QueueModule],
+  imports: [
+    LoggerModule.forRoot({
+      pinoHttp: {
+        transport:
+          process.env.NODE_ENV !== 'production'
+            ? {
+                target: 'pino-pretty',
+                options: { colorize: true, singleLine: true },
+              }
+            : undefined,
+      },
+    }),
+    AuthModule,
+    BankingCoreModule,
+    AccountModule,
+    TransactionModule,
+    AuditModule,
+    QueueModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
