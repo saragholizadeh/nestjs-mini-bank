@@ -21,7 +21,8 @@
     "migration:generate": "typeorm-ts-node-commonjs migration:generate -d data-source.ts",
     "migration:create": "typeorm migration:create src/infrastructure/database/migrations/$npm_config_name",
     "migration:run": "typeorm-ts-node-commonjs migration:run -d data-source.ts",
-    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d data-source.ts"
+    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d data-source.ts",
+    "seed:currencies": "ts-node -r tsconfig-paths/register src/infrastructure/database/seeds/currencies.seed.ts"
   },
   "dependencies": {
     "@nestjs/bullmq": "^11.0.4",

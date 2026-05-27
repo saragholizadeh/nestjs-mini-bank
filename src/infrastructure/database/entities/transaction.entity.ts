@@ -8,6 +8,8 @@ import {
 import { Account } from './account.entity';
 import { Currency } from './currency.entity';
 import { TransferLog } from './transfer-log.entity';
+import { PROCESS_STATUSES } from 'src/common/constants/transaction.constants';
+import type { ProcessStatus, TransactionType } from 'src/common/types/transaction.types';
 
 @Entity('transactions')
 export class Transaction {
@@ -29,7 +31,7 @@ export class Transaction {
   transferLog: TransferLog | null;
 
   @Column()
-  type: string; // deposit | withdrawal | transfer_in | transfer_out
+  type: TransactionType;
 
   @Column({ type: 'bigint' })
   amount: number;
@@ -47,8 +49,8 @@ export class Transaction {
   @Column({ name: 'balance_after', type: 'bigint' })
   balanceAfter: number;
 
-  @Column({ default: 'pending' })
-  status: string; // pending | completed | failed
+  @Column({ default: PROCESS_STATUSES.PENDING })
+  status: ProcessStatus;
 
   @Column({
     name: 'idempotency_key',

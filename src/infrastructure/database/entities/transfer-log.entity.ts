@@ -9,6 +9,8 @@ import {
 import { Account } from './account.entity';
 import { Currency } from './currency.entity';
 import { Transaction } from './transaction.entity';
+import { PROCESS_STATUSES } from 'src/common/constants/transaction.constants';
+import type { ProcessStatus } from 'src/common/types/transaction.types';
 
 @Entity('transfer_logs')
 export class TransferLog {
@@ -39,8 +41,8 @@ export class TransferLog {
   @JoinColumn({ name: 'currency_code' })
   currency: Currency;
 
-  @Column({ default: 'pending' })
-  status: string;
+  @Column({ default: PROCESS_STATUSES.PENDING })
+  status: ProcessStatus;
 
   @Column({ name: 'job_id', type: 'varchar', nullable: true })
   jobId: string | null;

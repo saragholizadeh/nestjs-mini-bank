@@ -36,6 +36,45 @@ This project is a simplified banking system designed to implement core backend e
     - Focus on testability and future extensibility
 
 
+## TO-DO list
+
+```
+- [✅] Phase 1 — Foundation
+        ├── project skeleton
+        ├── packages
+        ├── database config + docker
+        └── entities + migrations
+
+- [] Phase 2 — Auth 
+        ├── register (hash password, create user + account)
+        ├── login (validate, return JWT)
+        └── JWT guard (protect routes)
+
+- [] Phase 3 — Banking Core
+        ├── AccountLockManager (SELECT FOR UPDATE)
+        ├── BalanceValidator
+        ├── TransactionRecorder
+        └── LedgerService (ties them together)
+
+- [] Phase 4 — Transactions
+        ├── deposit
+        ├── withdraw
+        └── transfer
+
+- [] Phase 5 — Event System
+        ├── define domain events
+        ├── emit events from LedgerService
+        ├── AuditListener
+        └── QueueListener
+
+- [] Phase 6 — Read Operations
+        ├── view balance
+        └── transaction history
+
+- [] Phase 7 — Queue
+        └── TransferProcessor (async transfer handling)
+```
+
 ## System Overview
 
 These diagrams show the main flows of the system and how its parts interact with each other.

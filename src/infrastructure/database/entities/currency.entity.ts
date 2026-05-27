@@ -1,9 +1,10 @@
 import { Column, Entity } from 'typeorm';
+import type { CurrencyCode } from 'src/common/types/currency.types';
 
 @Entity('currencies')
 export class Currency {
   @Column({ primary: true, length: 3 })
-  code: string; // USD, IRR — ISO 4217
+  code: CurrencyCode; // ISO 4217
 
   @Column()
   name: string;

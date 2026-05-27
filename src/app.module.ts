@@ -10,18 +10,24 @@ import { QueueModule } from './infrastructure/queue/queue.module';
 import { LoggerModule } from 'nestjs-pino';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import appConfig from './configs/app.config';
 import databaseConfig from './configs/database.config';
+import jwtConfig from './configs/jwt.config';
+import {
+  APP_ENVIRONMENTS,
+  DATABASE_DEFAULTS,
+} from './common/constants/runtime.constants';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig],
+      load: [appConfig, databaseConfig, jwtConfig],
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        type: 'postgres',
+        type: DATABASE_DEFAULTS.DRIVER,
         host: config.get('database.host'),
         port: config.get('database.port'),
         database: config.get('database.name'),
@@ -32,19 +38,23 @@ import databaseConfig from './configs/database.config';
           __dirname + '/infrastructure/database/migrations/*{.ts,.js}',
         ],
         synchronize: false, // never true — always use migrations
-        logging: process.env.NODE_ENV === 'development',
+        logging:
+          config.get<string>('app.nodeEnv') === APP_ENVIRONMENTS.DEVELOPMENT,
       }),
     }),
-    LoggerModule.forRoot({
-      pinoHttp: {
-        transport:
-          process.env.NODE_ENV !== 'production'
+    LoggerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        pinoHttp:
+          config.get<string>('app.nodeEnv') !== APP_ENVIRONMENTS.PRODUCTION
             ? {
-                target: 'pino-pretty',
-                options: { colorize: true, singleLine: true },
+                transport: {
+                  target: 'pino-pretty',
+                  options: { colorize: true, singleLine: true },
+                },
               }
             : undefined,
-      },
+      }),
     }),
     AuthModule,
     BankingCoreModule,
