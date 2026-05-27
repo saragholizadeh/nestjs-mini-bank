@@ -45,7 +45,7 @@ This project is a simplified banking system designed to implement core backend e
         ├── database config + docker
         └── entities + migrations
 
-- [] Phase 2 — Auth 
+- [✅] Phase 2 — Auth 
         ├── register (hash password, create user + account)
         ├── login (validate, return JWT)
         └── JWT guard (protect routes)
