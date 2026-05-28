@@ -2,18 +2,26 @@ import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import {
+  ApiAuthControllerDocs,
+  ApiLoginDocs,
+  ApiRegisterDocs,
+} from './auth.swagger';
 
+@ApiAuthControllerDocs()
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
+  @ApiRegisterDocs()
   register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @ApiLoginDocs()
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
