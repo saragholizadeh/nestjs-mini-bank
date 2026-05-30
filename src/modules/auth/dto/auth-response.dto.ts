@@ -19,3 +19,25 @@ export class LoginResponseDto {
   })
   accessToken: string;
 }
+
+export class MeResponseDto {
+  @ApiProperty({
+    example: '55d4b4bf-1b24-4c3c-8d89-2e1b8d9b78da',
+  })
+  id: string;
+
+  @ApiProperty({
+    example: 'sara@example.com',
+  })
+  email: string;
+
+  @ApiProperty({
+    example: 'Sara Ahmadi',
+  })
+  fullName: string;
+
+  @ApiProperty({
+    example: true,
+  })
+  isActive: boolean;
+}

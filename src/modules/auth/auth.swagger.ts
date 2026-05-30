@@ -1,8 +1,17 @@
 import { HttpStatus, applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { LoginResponseDto, RegisterResponseDto } from './dto/auth-response.dto';
+import {
+  LoginResponseDto,
+  MeResponseDto,
+  RegisterResponseDto,
+} from './dto/auth-response.dto';
 import {
   apiErrorEnvelopeResponse,
   apiSuccessEnvelopeResponse,
@@ -167,6 +176,47 @@ export const ApiLoginDocs = () =>
         data: null,
         error: {
           code: 'INTERNAL_SERVER_ERROR',
+          details: null,
+        },
+      },
+    }),
+  );
+
+export const ApiGetMeDocs = () =>
+  applyDecorators(
+    ApiBearerAuth('access-token'),
+    ApiOperation({
+      summary: 'Get current user profile',
+      description:
+        'Returns the authenticated user profile derived from the JWT access token.',
+    }),
+    apiSuccessEnvelopeResponse({
+      status: HttpStatus.OK,
+      description: 'Current user profile returned successfully.',
+      dataType: MeResponseDto,
+      example: {
+        success: true,
+        statusCode: 200,
+        message: 'Request completed successfully',
+        data: {
+          id: '55d4b4bf-1b24-4c3c-8d89-2e1b8d9b78da',
+          email: 'sara@example.com',
+          fullName: 'Sara Ahmadi',
+          isActive: true,
+        },
+        error: null,
+      },
+    }),
+    apiErrorEnvelopeResponse({
+      status: HttpStatus.UNAUTHORIZED,
+      description: 'Missing, expired, or invalid bearer token.',
+      example: {
+        success: false,
+        statusCode: 401,
+        message: 'Unauthorized',
+        data: null,
+        error: {
+          code: 'UNAUTHORIZED',
           details: null,
         },
       },

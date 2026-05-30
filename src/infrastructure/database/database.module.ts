@@ -9,6 +9,8 @@ import { AccountLimit } from './entities/account-limit.entity';
 import { Currency } from './entities/currency.entity';
 import { UserRepository } from './repositories/user.repository';
 import { AccountRepository } from './repositories/account.repository';
+import { TransactionRepository } from './repositories/transaction.repository';
+import { TransferLogRepository } from './repositories/transfer-log.repository';
 
 @Module({
   imports: [
@@ -22,7 +24,17 @@ import { AccountRepository } from './repositories/account.repository';
       Currency,
     ]),
   ],
-  providers: [UserRepository, AccountRepository],
-  exports: [UserRepository, AccountRepository],
+  providers: [
+    UserRepository,
+    AccountRepository,
+    TransactionRepository,
+    TransferLogRepository,
+  ],
+  exports: [
+    UserRepository,
+    AccountRepository,
+    TransactionRepository,
+    TransferLogRepository,
+  ],
 })
 export class DatabaseModule {}

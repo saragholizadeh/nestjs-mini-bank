@@ -44,37 +44,40 @@ This project is a simplified banking system designed to implement core backend e
         ├── packages
         ├── database config + docker
         └── entities + migrations
+        ├── Swagger / OpenAPI documentation
+        └── repository layer separated from services
 
-- [✅] Phase 2 — Auth 
+- [✅] Phase 2 — Auth
         ├── register (hash password, create user + account)
         ├── login (validate, return JWT)
-        └── JWT guard (protect routes)
+        ├── JWT guard + strategy (protect routes)
+        └── repository layer (UserRepository, AccountRepository)
 
-- [] Phase 3 — Banking Core
+- [✅] Phase 3 — Banking Core
         ├── AccountLockManager (SELECT FOR UPDATE)
         ├── BalanceValidator
         ├── TransactionRecorder
-        └── LedgerService (ties them together)
+        └── LedgerService (coordinates all steps)
 
-- [] Phase 4 — Transactions
+- [ ] Phase 4 — Transactions
         ├── deposit
         ├── withdraw
-        └── transfer
+        └── transfer (sync for now, queue in phase 7)
 
-- [] Phase 5 — Event System
-        ├── define domain events
-        ├── emit events from LedgerService
-        ├── AuditListener
-        └── QueueListener
-
-- [] Phase 6 — Read Operations
+- [ ] Phase 5 — Read Operations
         ├── view balance
         └── transaction history
 
-- [] Phase 7 — Queue
-        └── TransferProcessor (async transfer handling)
-```
+- [ ] Phase 6 — Event System
+        ├── define domain events
+        ├── emit from LedgerService after commit
+        ├── AuditListener → writes audit_logs
+        └── QueueListener → pushes to Bull
 
+- [ ] Phase 7 — Async Queue
+        └── TransferProcessor (retry, failure handling)
+
+```
 ## System Overview
 
 These diagrams show the main flows of the system and how its parts interact with each other.
@@ -167,6 +170,19 @@ The API is documented with Swagger and available at:
 
 <img src="./docs/api/image.png" width="400" />
 
+ALL APIS:
+
+```
+✅ POST   /auth/register
+✅ POST   /auth/login
+
+GET    /account/me              ← my account info + balance
+GET    /account/transactions    ← my transaction history
+
+POST   /transaction/deposit
+POST   /transaction/withdraw
+POST   /transaction/transfer
+```
 
 ## Running the Project
 

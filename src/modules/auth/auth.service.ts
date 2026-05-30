@@ -15,6 +15,7 @@ import {
   ACCOUNT_NUMBER_RULES,
   AUTH_DEFAULTS,
 } from 'src/common/constants/runtime.constants';
+import { MeResponseDto } from './dto/auth-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -81,6 +82,20 @@ export class AuthService {
     return {
       message: 'Login successful',
       data: { accessToken: token },
+    };
+  }
+
+  getMe(user: {
+    id: string;
+    email: string;
+    fullName: string;
+    isActive: boolean;
+  }): MeResponseDto {
+    return {
+      id: user.id,
+      email: user.email,
+      fullName: user.fullName,
+      isActive: user.isActive,
     };
   }
 
