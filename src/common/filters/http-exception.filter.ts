@@ -15,6 +15,8 @@ type ExceptionResponseBody = {
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
+  constructor(private readonly exposeErrorDetails = false) {}
+
   catch(exception: unknown, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse<Response>();
     const payload = this.normalizeException(exception);
@@ -81,8 +83,18 @@ export class HttpExceptionFilter implements ExceptionFilter {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       code: 'INTERNAL_SERVER_ERROR',
       message: 'Something went wrong',
-      details: null,
+      details: this.exposeErrorDetails
+        ? [this.getUnknownErrorMessage(exception)]
+        : null,
     };
+  }
+
+  private getUnknownErrorMessage(exception: unknown): string {
+    if (exception instanceof Error) {
+      return exception.message;
+    }
+
+    return 'Unexpected non-error exception was thrown';
   }
 
   private defaultHttpMessage(statusCode: number): string {

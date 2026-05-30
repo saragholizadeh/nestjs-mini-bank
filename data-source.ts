@@ -1,14 +1,16 @@
 import { DataSource } from 'typeorm';
-import * as dotenv from 'dotenv';
-dotenv.config();
+import { createEnvironmentConfig } from './src/configs/environment-config.factory';
+import { DATABASE_DEFAULTS } from './src/common/constants/runtime.constants';
+
+const config = createEnvironmentConfig();
 
 export const AppDataSource = new DataSource({
-  type: 'postgres',
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT ?? 5432),
-  database: process.env.DB_NAME,
-  username: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
+  type: DATABASE_DEFAULTS.DRIVER,
+  host: config.database.host,
+  port: config.database.port,
+  database: config.database.name,
+  username: config.database.username,
+  password: config.database.password,
   entities: ['src/infrastructure/database/entities/*.entity.ts'],
   migrations: ['src/infrastructure/database/migrations/*{.ts,.js}'],
 });

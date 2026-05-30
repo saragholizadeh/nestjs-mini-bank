@@ -6,45 +6,39 @@ import { TransactionModule } from './modules/transaction/transaction.module';
 import { AuditModule } from './infrastructure/audit/audit.module';
 import { QueueModule } from './infrastructure/queue/queue.module';
 import { LoggerModule } from 'nestjs-pino';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import appConfig from './configs/app.config';
-import databaseConfig from './configs/database.config';
-import jwtConfig from './configs/jwt.config';
 import {
   APP_ENVIRONMENTS,
   DATABASE_DEFAULTS,
 } from './common/constants/runtime.constants';
+import { EnvironmentConfigModule } from './configs/environment-config.module';
+import { EnvironmentConfigService } from './configs/environment-config.service';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      load: [appConfig, databaseConfig, jwtConfig],
-    }),
+    EnvironmentConfigModule,
     TypeOrmModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
+      inject: [EnvironmentConfigService],
+      useFactory: (config: EnvironmentConfigService) => ({
         type: DATABASE_DEFAULTS.DRIVER,
-        host: config.get('database.host'),
-        port: config.get('database.port'),
-        database: config.get('database.name'),
-        username: config.get('database.username'),
-        password: config.get('database.password'),
+        host: config.database.host,
+        port: config.database.port,
+        database: config.database.name,
+        username: config.database.username,
+        password: config.database.password,
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         migrations: [
           __dirname + '/infrastructure/database/migrations/*{.ts,.js}',
         ],
-        synchronize: false, // never true — always use migrations
-        logging:
-          config.get<string>('app.nodeEnv') === APP_ENVIRONMENTS.DEVELOPMENT,
+        synchronize: false,
+        logging: config.app.nodeEnv === APP_ENVIRONMENTS.DEVELOPMENT,
       }),
     }),
     LoggerModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
+      inject: [EnvironmentConfigService],
+      useFactory: (config: EnvironmentConfigService) => ({
         pinoHttp:
-          config.get<string>('app.nodeEnv') !== APP_ENVIRONMENTS.PRODUCTION
+          config.app.nodeEnv !== APP_ENVIRONMENTS.PRODUCTION
             ? {
                 transport: {
                   target: 'pino-pretty',

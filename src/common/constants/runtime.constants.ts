@@ -7,11 +7,17 @@ export const APP_ENVIRONMENTS = {
 export const APP_DEFAULTS = {
   PORT: 3000,
   NODE_ENV: APP_ENVIRONMENTS.DEVELOPMENT,
+  NAME: 'mini-bank',
 } as const;
 
 export const DATABASE_DEFAULTS = {
   PORT: 5432,
   DRIVER: 'postgres',
+} as const;
+
+export const REDIS_DEFAULTS = {
+  HOST: 'localhost',
+  PORT: 6379,
 } as const;
 
 export const AUTH_DEFAULTS = {
