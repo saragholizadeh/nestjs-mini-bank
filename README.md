@@ -80,7 +80,7 @@ This project is a simplified banking system designed to implement core backend e
 These diagrams show the main flows of the system and how its parts interact with each other.
 
 ### Use Case Diagram
-![Use Case](docs/diagrams/use_case.png)
+<img src="./docs/diagrams/use_case.png" width="400" />
 
 ### Sequence diagram Flows
 
@@ -98,84 +98,50 @@ See Withdraw flow here: [`docs/diagrams/withdraw_seq_diagram.png`](docs/diagrams
 ## Project Structure
 
 The project follows a strict layered architecture. The dependency direction always points inward: `modules` → `domain` → never back out.
+```
 
+├── src
+│   ├── app.module.ts
+│   ├── common                       
+│   │   ├── constants
+│   │   ├── decorators
+│   │   ├── filters
+│   │   ├── guards
+│   │   ├── interceptors
+│   │   ├── interfaces
+│   │   ├── pipes
+│   │   ├── types
+│   │   └── utils
+│   ├── configs
+│   ├── domain
+│   │   ├── banking-core
+│   │   └── events
+│   ├── infrastructure
+│   │   ├── audit
+│   │   │   ├── audit.listener.ts
+│   │   │   ├── audit.module.ts
+│   │   │   └── audit.service.ts
+│   │   ├── database
+│   │   │   ├── database.module.ts
+│   │   │   ├── entities
+│   │   │   ├── migrations
+│   │   │   ├── repositories
+│   │   │   └── seeds
+│   │   │       └── currencies.seed.ts
+│   │   ├── http
+│   │   │   └── swagger
+│   │   └── queue
+│   ├── main.ts
+│   └── modules
+│       ├── account
+│       ├── auth
+│       └── transaction
+│           ├── deposit
+│           ├── transaction.module.ts
+│           ├── transfer
+│           └── withdraw
 ```
-src/
-├── common/                        # Shared NestJS building blocks, no business logic
-│   ├── decorators/                # e.g. @CurrentUser()
-│   ├── filters/                   # Global exception filters
-│   ├── guards/                    # e.g. JwtAuthGuard
-│   ├── interceptors/              # e.g. logging, response shaping
-│   ├── pipes/                     # Validation pipes
-│   ├── types/                     # Shared TypeScript types and enums
-│   └── utils/                     # Pure utility functions e.g. money conversion
-│
-├── configs/                       # Reads environment variables, one file per concern
-│   ├── app.config.ts
-│   ├── database.config.ts
-│   └── jwt.config.ts
-│
-├── domain/                        # Business rules — no HTTP, no DB, no external deps
-│   ├── banking-core/              # The core banking engine
-│   │   ├── banking-core.module.ts
-│   │   ├── banking-core.service.ts   # LedgerService — coordinates lock→validate→mutate→record
-│   │   ├── account-lock.manager.ts   # Pessimistic locking (SELECT FOR UPDATE)
-│   │   ├── balance.validator.ts      # Business rules: sufficient balance, account status
-│   │   └── transaction.recorder.ts   # Writes balance_before/after snapshots
-│   │
-│   └── events/                    # Domain event definitions — plain TypeScript classes
-│       ├── money-deposited.event.ts
-│       ├── money-withdrawn.event.ts
-│       ├── transfer-completed.event.ts
-│       ├── transfer-failed.event.ts
-│       └── login-failed.event.ts
-│
-├── infrastructure/                # Adapters for external systems — DB, Redis, etc.
-│   ├── database/
-│   │   ├── entities/              # TypeORM entities
-│   │   ├── repositories/          # Data access — the only place SQL is written
-│   │   └── migrations/            # All schema migrations
-│   │
-│   ├── audit/
-│   │   ├── audit.module.ts
-│   │   ├── audit.service.ts       # Writes to audit_logs table
-│   │   └── audit.listener.ts      # @OnEvent handlers — listens to domain events
-│   │
-│   └── queue/
-│       ├── queue.module.ts
-│       ├── queue.service.ts       # Publishes jobs to Bull
-│       ├── queue.listener.ts      # @OnEvent handlers — listens to domain events
-│       └── processors/
-│           └── transfer.processor.ts
-│
-├── modules/                       # HTTP feature modules — controllers, DTOs, use-case services
-│   ├── auth/
-│   │   ├── auth.module.ts
-│   │   ├── auth.controller.ts
-│   │   └── auth.service.ts
-│   │
-│   ├── account/
-│   │   ├── account.module.ts
-│   │   ├── account.controller.ts
-│   │   └── account.service.ts
-│   │
-│   └── transaction/
-│       ├── transaction.module.ts
-│       ├── deposit/
-│       │   ├── deposit.module.ts
-│       │   ├── deposit.controller.ts
-│       │   └── deposit.service.ts
-│       ├── withdraw/
-│       │   ├── withdraw.module.ts
-│       │   ├── withdraw.controller.ts
-│       │   └── withdraw.service.ts
-│       └── transfer/
-│           ├── transfer.module.ts
-│           ├── transfer.controller.ts
-│           └── transfer.service.ts
-│
-└── main.ts
-```
+
 
 ### Layer responsibilities at a glance
 
@@ -194,33 +160,132 @@ The schema is designed around immutability and extensibility. Financial records 
 
 ## API Reference
 
-> 🚧 Full API documentation will be added once endpoints are implemented. Will cover request/response shapes, authentication, and error codes.
+The API is documented with Swagger and available at:
 
----
+- `http://localhost:3000/docs`
+
+
+<img src="./docs/api/image.png" width="400" />
+
 
 ## Running the Project
 
-> 🚧 Will cover prerequisites, `.env` setup, Docker Compose, and local development instructions.
+You can run the project in two ways:
 
----
+- with Docker for PostgreSQL and Redis
+- without Docker if you already have the required services running locally
+
+### Prerequisites
+
+- Node.js 20+
+- npm
+- PostgreSQL
+- Redis
+
+### Environment
+
+Create a `.env` file from `.env.example` and fill in the values for:
+
+- `DB_HOST`
+- `DB_PORT`
+- `DB_NAME`
+- `DB_USERNAME`
+- `DB_PASSWORD`
+- `JWT_SECRET`
+- `JWT_EXPIRES_IN`
+- `REDIS_HOST`
+- `REDIS_PORT`
+
+### Run With Docker
+
+Start the infrastructure:
+
+```bash
+docker compose up -d postgres redis
+```
+
+Run migrations:
+
+```bash
+npm run migration:run
+```
+
+Seed currencies:
+
+```bash
+npm run seed:currencies
+```
+
+Start the app:
+
+```bash
+npm run start:dev
+```
+
+### Run Without Docker
+
+If PostgreSQL and Redis are already available on your machine:
+
+1. Update `.env` so `DB_HOST`, `DB_PORT`, `REDIS_HOST`, and `REDIS_PORT` point to your local services.
+2. Run migrations:
+
+```bash
+npm run migration:run
+```
+
+3. Seed currencies:
+
+```bash
+npm run seed:currencies
+```
+
+4. Start the app:
+
+```bash
+npm run start:dev
+```
+
 
 ## Database Migrations
 
-> 🚧 Instructions for running and writing TypeORM migrations will be added here.
+The project uses TypeORM migrations for schema management.
 
----
+### Create a migration
+
+```bash
+npm run migration:create --name=your_migration_name
+```
+
+### Run migrations
+
+```bash
+npm run migration:run
+```
+
+### Revert the last migration
+
+```bash
+npm run migration:revert
+```
+
+### Seed reference data
+
+Currency rows are seeded separately:
+
+```bash
+npm run seed:currencies
+```
+
 
 ## Testing
 
 > 🚧 Will cover unit tests for domain logic, integration tests for API endpoints, and concurrency scenario testing.
 
----
 
 ## Deployment
 
 > 🚧 Will cover Docker image build, environment configuration, and production concerns.
 
----
 
 ## Tech Stack
 
@@ -236,7 +301,7 @@ The schema is designed around immutability and extensibility. Financial records 
 | Auth | JWT / Passport |
 | Logging | Pino |
 | Containerization | Docker |
-
+| API Documentation | Swagger |
 
 
 
