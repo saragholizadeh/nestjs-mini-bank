@@ -1,21 +1,21 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { LedgerService } from '../../../domain/banking-core/banking-core.service';
-import { AccountRepository } from '../../../infrastructure/database/repositories/account.repository';
 import { TransferDto } from '../dto/transaction.dto';
 import { User } from '../../../infrastructure/database/entities/user.entity';
+import { AccountOwnershipService } from '../account-ownership.service';
 
 @Injectable()
 export class TransferService {
   constructor(
     private readonly ledger: LedgerService,
-    private readonly accountRepo: AccountRepository,
+    private readonly accountOwnership: AccountOwnershipService,
   ) {}
 
   async transfer(
     user: User,
     dto: TransferDto,
   ): Promise<{ message: string; transferLogId: string }> {
-    await this.assertAccountOwnership(user.id, dto.fromAccountId);
+    await this.accountOwnership.assertOwner(user.id, dto.fromAccountId);
 
     const result = await this.ledger.transfer(
       dto.fromAccountId,
@@ -28,15 +28,5 @@ export class TransferService {
       message: 'Transfer successful',
       transferLogId: result.transferLogId,
     };
-  }
-
-  private async assertAccountOwnership(
-    userId: string,
-    accountId: string,
-  ): Promise<void> {
-    const account = await this.accountRepo.findById(accountId);
-    if (!account || account.userId !== userId) {
-      throw new ForbiddenException('Account does not belong to you');
-    }
   }
 }
