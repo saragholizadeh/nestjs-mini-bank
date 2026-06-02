@@ -43,14 +43,10 @@ export class MeResponseDto {
 
   @ApiProperty({
     example: [
-      {
-        id: 'f4f5cc5f-25a5-4f0e-b6a8-bf1b645cb111',
-        accountNumber: '1234567890',
-      },
+      'f4f5cc5f-25a5-4f0e-b6a8-bf1b645cb111',
+      '0a711cdd-91ad-44cc-9634-65d5f10e9a77',
     ],
+    type: [String],
   })
-  accounts?: {
-    id: string;
-    accountNumber: string;
-  }[];
+  accountIds: string[];
 }

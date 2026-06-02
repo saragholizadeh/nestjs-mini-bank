@@ -85,17 +85,20 @@ export class AuthService {
     };
   }
 
-  getMe(user: {
+  async getMe(user: {
     id: string;
     email: string;
     fullName: string;
     isActive: boolean;
-  }): MeResponseDto {
+  }): Promise<MeResponseDto> {
+    const accounts = await this.accountRepo.findByUserId(user.id);
+
     return {
       id: user.id,
       email: user.email,
       fullName: user.fullName,
       isActive: user.isActive,
+      accountIds: accounts.map((account) => account.id),
     };
   }
 
