@@ -1,11 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsInt,
+  Max,
+  Min,
   IsPositive,
   IsString,
   IsUUID,
   IsOptional,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class DepositDto {
   @ApiProperty({
@@ -87,4 +90,29 @@ export class TransferDto {
   @IsString()
   @IsOptional()
   idempotencyKey?: string;
+}
+
+export class TransactionHistoryQueryDto {
+  @ApiPropertyOptional({
+    example: 1,
+    default: 1,
+    description: 'Page number, starting from 1.',
+  })
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  page?: number = 1;
+
+  @ApiPropertyOptional({
+    example: 20,
+    default: 20,
+    description: 'Number of transactions per page.',
+  })
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  @IsOptional()
+  limit?: number = 20;
 }

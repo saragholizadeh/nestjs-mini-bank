@@ -59,14 +59,16 @@ This project is a simplified banking system designed to implement core backend e
         ├── TransactionRecorder
         └── LedgerService (coordinates all steps)
 
-- [ ] Phase 4 — Transactions
+- [✅] Phase 4 — Transactions
         ├── deposit
         ├── withdraw
         └── transfer (sync for now, queue in phase 7)
 
-- [ ] Phase 5 — Read Operations
+- [✅] Phase 5 — Read Operations
+        ├── my accounts
         ├── view balance
-        └── transaction history
+        ├── transaction history with pagination
+        └── transaction receipt
 
 - [ ] Phase 6 — Event System
         ├── define domain events
@@ -175,14 +177,92 @@ ALL APIS:
 ```
 ✅ POST   /auth/register
 ✅ POST   /auth/login
+✅ GET    /auth/me
 
-GET    /account/me              ← my account info + balance
-GET    /account/transactions    ← my transaction history
+✅ GET    /accounts/my
+✅ GET    /accounts/:accountId/balance
 
-POST   /transaction/deposit
-POST   /transaction/withdraw
-POST   /transaction/transfer
+✅ POST   /transaction/deposit
+✅ POST   /transaction/withdraw
+✅ POST   /transaction/transfer
+✅ GET    /transaction/history?page=1&limit=20
+✅ GET    /transaction/:transactionId/receipt
 ```
+
+All protected APIs require a JWT bearer token.
+
+All responses use the same response envelope:
+
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Request completed successfully",
+  "data": {},
+  "error": null
+}
+```
+
+Error responses keep the same shape:
+
+```json
+{
+  "success": false,
+  "statusCode": 401,
+  "message": "Unauthorized",
+  "data": null,
+  "error": {
+    "code": "UNAUTHORIZED",
+    "details": null
+  }
+}
+```
+
+### Auth APIs
+
+`POST /auth/register`
+
+Creates a new user and default account inside one database transaction.
+
+`POST /auth/login`
+
+Validates credentials and returns a JWT access token.
+
+`GET /auth/me`
+
+Returns the authenticated user profile. Account details are handled by the account APIs.
+
+### Account APIs
+
+`GET /accounts/my`
+
+Returns all accounts owned by the authenticated user.
+
+`GET /accounts/:accountId/balance`
+
+Returns the balance for one owned account.
+
+### Transaction APIs
+
+`POST /transaction/deposit`
+
+Deposits funds into an owned account.
+
+`POST /transaction/withdraw`
+
+Withdraws funds from an owned account after balance validation.
+
+`POST /transaction/transfer`
+
+Transfers funds from an owned source account to another account.
+
+`GET /transaction/history?page=1&limit=20`
+
+Returns paginated transaction history for all accounts owned by the authenticated user.
+
+`GET /transaction/:transactionId/receipt`
+
+Returns the receipt for a transaction that belongs to the authenticated user.
 
 ## Running the Project
 
@@ -318,6 +398,5 @@ npm run seed:currencies
 | Logging | Pino |
 | Containerization | Docker |
 | API Documentation | Swagger |
-
 
 
