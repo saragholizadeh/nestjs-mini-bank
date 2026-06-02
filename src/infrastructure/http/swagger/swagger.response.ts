@@ -5,10 +5,12 @@ import {
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiExtraModels,
+  ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiResponseOptions,
   ApiUnauthorizedResponse,
+  ApiUnprocessableEntityResponse,
   getSchemaPath,
 } from '@nestjs/swagger';
 
@@ -23,7 +25,7 @@ type ApiEnvelopeExample = {
 type ApiEnvelopeSuccessOptions = {
   status: HttpStatus;
   description: string;
-  dataType: Type<unknown>;
+  dataType?: Type<unknown>;
   example: ApiEnvelopeExample;
 };
 
@@ -73,7 +75,9 @@ export function apiSuccessEnvelopeResponse({
         success: { type: 'boolean', example: true },
         statusCode: { type: 'number', example: status },
         message: { type: 'string', example: example.message },
-        data: { $ref: getSchemaPath(dataType) },
+        data: dataType
+          ? { $ref: getSchemaPath(dataType) }
+          : { nullable: true, example: null },
         error: { nullable: true, example: null },
       },
       required: ['success', 'statusCode', 'message', 'data', 'error'],
@@ -81,10 +85,12 @@ export function apiSuccessEnvelopeResponse({
     },
   };
 
-  return applyDecorators(
-    ApiExtraModels(dataType),
-    responseDecorator(responseOptions),
-  );
+  return dataType
+    ? applyDecorators(
+        ApiExtraModels(dataType),
+        responseDecorator(responseOptions),
+      )
+    : applyDecorators(responseDecorator(responseOptions));
 }
 
 export function apiErrorEnvelopeResponse({
@@ -95,7 +101,9 @@ export function apiErrorEnvelopeResponse({
   const responseMap = {
     [HttpStatus.BAD_REQUEST]: ApiBadRequestResponse,
     [HttpStatus.UNAUTHORIZED]: ApiUnauthorizedResponse,
+    [HttpStatus.FORBIDDEN]: ApiForbiddenResponse,
     [HttpStatus.CONFLICT]: ApiConflictResponse,
+    [HttpStatus.UNPROCESSABLE_ENTITY]: ApiUnprocessableEntityResponse,
     [HttpStatus.INTERNAL_SERVER_ERROR]: ApiInternalServerErrorResponse,
   } as const;
 

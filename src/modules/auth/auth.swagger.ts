@@ -198,6 +198,12 @@ export const ApiGetMeDocs = () =>
           email: 'sara@example.com',
           fullName: 'Sara Ahmadi',
           isActive: true,
+          accounts: [
+            {
+              id: 'f4f5cc5f-25a5-4f0e-b6a8-bf1b645cb111',
+              accountNumber: '1234567890',
+            },
+          ],
         },
         error: null,
       },

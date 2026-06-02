@@ -13,5 +13,6 @@ import { BalanceValidator } from './balance.validator';
     BalanceValidator,
     TransactionRecorder,
   ],
+  exports: [LedgerService],
 })
 export class BankingCoreModule {}

@@ -40,4 +40,17 @@ export class MeResponseDto {
     example: true,
   })
   isActive: boolean;
+
+  @ApiProperty({
+    example: [
+      {
+        id: 'f4f5cc5f-25a5-4f0e-b6a8-bf1b645cb111',
+        accountNumber: '1234567890',
+      },
+    ],
+  })
+  accounts?: {
+    id: string;
+    accountNumber: string;
+  }[];
 }

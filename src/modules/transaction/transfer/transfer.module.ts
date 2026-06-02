@@ -1,8 +1,11 @@
 import { Module } from '@nestjs/common';
-import { TransferService } from './transfer.service';
+import { BankingCoreModule } from '../../../domain/banking-core/banking-core.module';
+import { DatabaseModule } from '../../../infrastructure/database/database.module';
 import { TransferController } from './transfer.controller';
+import { TransferService } from './transfer.service';
 
 @Module({
+  imports: [BankingCoreModule, DatabaseModule],
   controllers: [TransferController],
   providers: [TransferService],
 })
