@@ -11,6 +11,7 @@ import { UserRepository } from './repositories/user.repository';
 import { AccountRepository } from './repositories/account.repository';
 import { TransactionRepository } from './repositories/transaction.repository';
 import { TransferLogRepository } from './repositories/transfer-log.repository';
+import { AuditLogRepository } from './repositories/audit-log.repository';
 
 @Module({
   imports: [
@@ -29,12 +30,14 @@ import { TransferLogRepository } from './repositories/transfer-log.repository';
     AccountRepository,
     TransactionRepository,
     TransferLogRepository,
+    AuditLogRepository,
   ],
   exports: [
     UserRepository,
     AccountRepository,
     TransactionRepository,
     TransferLogRepository,
+    AuditLogRepository,
   ],
 })
 export class DatabaseModule {}

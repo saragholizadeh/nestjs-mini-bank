@@ -11,11 +11,17 @@ export class WithdrawService {
     private readonly accountOwnership: AccountOwnershipService,
   ) {}
 
-  async withdraw(user: User, dto: WithdrawDto): Promise<{ message: string }> {
+  async withdraw(
+    user: User,
+    dto: WithdrawDto,
+    ip: string | null,
+  ): Promise<{ message: string }> {
     await this.accountOwnership.assertOwner(user.id, dto.accountId);
 
     await this.ledger.debit(dto.accountId, dto.amount, {
       idempotencyKey: dto.idempotencyKey,
+      userId: user.id,
+      ipAddress: ip,
     });
 
     return { message: 'Withdrawal successful' };

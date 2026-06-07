@@ -8,6 +8,7 @@ import {
   ApiTransactionControllerDocs,
   ApiWithdrawDocs,
 } from '../transaction.swagger';
+import { IpAddress } from 'src/common/decorators/ip-address.decorator';
 
 @ApiTransactionControllerDocs()
 @UseGuards(JwtAuthGuard)
@@ -17,7 +18,11 @@ export class WithdrawController {
 
   @Post('withdraw')
   @ApiWithdrawDocs()
-  withdraw(@CurrentUser() user: User, @Body() dto: WithdrawDto) {
-    return this.withdrawService.withdraw(user, dto);
+  withdraw(
+    @CurrentUser() user: User,
+    @Body() dto: WithdrawDto,
+    @IpAddress() ip: string | null,
+  ) {
+    return this.withdrawService.withdraw(user, dto, ip);
   }
 }

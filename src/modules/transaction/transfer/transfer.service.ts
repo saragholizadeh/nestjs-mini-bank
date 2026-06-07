@@ -14,6 +14,7 @@ export class TransferService {
   async transfer(
     user: User,
     dto: TransferDto,
+    ip: string | null,
   ): Promise<{ message: string; transferLogId: string }> {
     await this.accountOwnership.assertOwner(user.id, dto.fromAccountId);
 
@@ -21,7 +22,11 @@ export class TransferService {
       dto.fromAccountId,
       dto.toAccountId,
       dto.amount,
-      { idempotencyKey: dto.idempotencyKey },
+      {
+        idempotencyKey: dto.idempotencyKey,
+        userId: user.id,
+        ipAddress: ip,
+      },
     );
 
     return {

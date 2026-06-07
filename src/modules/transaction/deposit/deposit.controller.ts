@@ -8,6 +8,7 @@ import {
   ApiDepositDocs,
   ApiTransactionControllerDocs,
 } from '../transaction.swagger';
+import { IpAddress } from 'src/common/decorators/ip-address.decorator';
 
 @ApiTransactionControllerDocs()
 @UseGuards(JwtAuthGuard)
@@ -17,7 +18,11 @@ export class DepositController {
 
   @Post('deposit')
   @ApiDepositDocs()
-  deposit(@CurrentUser() user: User, @Body() dto: DepositDto) {
-    return this.depositService.deposit(user, dto);
+  deposit(
+    @CurrentUser() user: User,
+    @Body() dto: DepositDto,
+    @IpAddress() ip: string | null,
+  ) {
+    return this.depositService.deposit(user, dto, ip);
   }
 }

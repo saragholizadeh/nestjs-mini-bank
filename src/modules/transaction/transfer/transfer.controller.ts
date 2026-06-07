@@ -8,6 +8,7 @@ import {
   ApiTransactionControllerDocs,
   ApiTransferDocs,
 } from '../transaction.swagger';
+import { IpAddress } from 'src/common/decorators/ip-address.decorator';
 
 @ApiTransactionControllerDocs()
 @UseGuards(JwtAuthGuard)
@@ -17,7 +18,11 @@ export class TransferController {
 
   @Post('transfer')
   @ApiTransferDocs()
-  transfer(@CurrentUser() user: User, @Body() dto: TransferDto) {
-    return this.transferService.transfer(user, dto);
+  transfer(
+    @CurrentUser() user: User,
+    @Body() dto: TransferDto,
+    @IpAddress() ip: string | null,
+  ) {
+    return this.transferService.transfer(user, dto, ip);
   }
 }

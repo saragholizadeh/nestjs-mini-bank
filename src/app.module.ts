@@ -13,6 +13,7 @@ import {
 } from './common/constants/runtime.constants';
 import { EnvironmentConfigModule } from './configs/environment-config.module';
 import { EnvironmentConfigService } from './configs/environment-config.service';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -54,6 +55,12 @@ import { EnvironmentConfigService } from './configs/environment-config.service';
     TransactionModule,
     AuditModule,
     QueueModule,
+    EventEmitterModule.forRoot({
+      wildcard: true,
+      delimiter: '.',
+      maxListeners: 10,
+      ignoreErrors: false,
+    }),
   ],
 })
 export class AppModule {}

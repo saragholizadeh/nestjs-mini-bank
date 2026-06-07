@@ -16,6 +16,9 @@ import {
   AUTH_DEFAULTS,
 } from 'src/common/constants/runtime.constants';
 import { MeResponseDto } from './dto/auth-response.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EVENTS } from 'src/domain/events/event-names';
+import { LoginFailedEvent } from '../../domain/events/login-failed.event';
 
 @Injectable()
 export class AuthService {
@@ -24,6 +27,7 @@ export class AuthService {
     private readonly userRepo: UserRepository,
     private readonly accountRepo: AccountRepository,
     private readonly jwtService: JwtService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -67,6 +71,10 @@ export class AuthService {
         },
       );
     } catch (error) {
+      this.eventEmitter.emit(
+        EVENTS.LOGIN_FAILED,
+        new LoginFailedEvent(dto.email, null, new Date()),
+      );
       this.handleRegisterError(error);
     }
   }
@@ -76,7 +84,13 @@ export class AuthService {
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
     const passwordMatch = await bcrypt.compare(dto.password, user.passwordHash);
-    if (!passwordMatch) throw new UnauthorizedException('Invalid credentials');
+    if (!passwordMatch) {
+      this.eventEmitter.emit(
+        EVENTS.LOGIN_FAILED,
+        new LoginFailedEvent(dto.email, null, new Date()),
+      );
+      throw new UnauthorizedException('Invalid credentials');
+    }
 
     const token = this.jwtService.sign({ sub: user.id, email: user.email });
     return {

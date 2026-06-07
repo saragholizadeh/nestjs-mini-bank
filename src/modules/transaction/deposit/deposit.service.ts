@@ -11,11 +11,17 @@ export class DepositService {
     private readonly accountOwnership: AccountOwnershipService,
   ) {}
 
-  async deposit(user: User, dto: DepositDto): Promise<{ message: string }> {
+  async deposit(
+    user: User,
+    dto: DepositDto,
+    ip: string | null,
+  ): Promise<{ message: string }> {
     await this.accountOwnership.assertOwner(user.id, dto.accountId);
 
     await this.ledger.credit(dto.accountId, dto.amount, {
       idempotencyKey: dto.idempotencyKey,
+      userId: user.id,
+      ipAddress: ip,
     });
 
     return { message: 'Deposit successful' };
