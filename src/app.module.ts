@@ -14,6 +14,8 @@ import {
 import { EnvironmentConfigModule } from './configs/environment-config.module';
 import { EnvironmentConfigService } from './configs/environment-config.service';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { BullModule } from '@nestjs/bullmq';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -61,6 +63,17 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
       maxListeners: 10,
       ignoreErrors: false,
     }),
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        connection: {
+          host: config.get<string>('REDIS_HOST'),
+          port: config.get<number>('REDIS_PORT'),
+        },
+      }),
+    }),
+    QueueModule,
   ],
 })
 export class AppModule {}
