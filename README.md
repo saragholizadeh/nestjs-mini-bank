@@ -1,7 +1,6 @@
-<h1 align="center">Mini Bank</h1>
+<h3 align="center">Mini Bank</h3>
 <p align="center">A simplified banking system built with NestJS and PostgreSQL</p>
 
----
 
 ## Description
 
@@ -9,7 +8,6 @@ This project is a simplified banking system designed to implement core backend e
 
 The focus is not only on basic banking operations, but also on event-driven architecture, audit traceability, concurrency control, and system reliability — the kind of concerns that separate a working system from a production-grade one.
 
----
 
 ## Key Features & Engineering Concerns
 
@@ -53,7 +51,6 @@ The focus is not only on basic banking operations, but also on event-driven arch
 - Each layer has a single, well-defined responsibility
 - Designed for testability and future extensibility
 
----
 
 ## TO-DO List
 
@@ -122,7 +119,7 @@ The focus is not only on basic banking operations, but also on event-driven arch
 
 > PlantUML source files for all diagrams are in `/docs/plantuml/`
 
----
+
 
 ## Project Structure
 
@@ -176,7 +173,6 @@ src/
 | `infrastructure/` | ❌ | ✅ | ❌ | ✅ |
 | `common/` | ❌ | ❌ | ❌ | ❌ |
 
----
 
 ## Data Model
 
@@ -333,19 +329,17 @@ npm run seed:currencies
 
 > Never edit a migration that has already been run. Never delete migration files.
 
----
+
 
 ## Testing
 
 > 🚧 In progress. Will cover unit tests for domain logic, auth service, and queue processor.
 
----
 
 ## Deployment
 
 > 🚧 Will cover Docker image build, environment configuration, and production concerns.
 
----
 
 ## Tech Stack
 
