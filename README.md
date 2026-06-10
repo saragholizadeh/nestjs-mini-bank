@@ -1,49 +1,68 @@
-<h1>Mini Bank </h1>
+<h1 align="center">Mini Bank</h1>
+<p align="center">A simplified banking system built with NestJS and PostgreSQL</p>
 
-This project is a simplified banking system designed to implement core backend engineering concepts commonly used in production-grade financial systems. <br> The focus is not only on basic banking operations, but also important topics such as concurrency control, data consistency, and system reliability.
+---
 
-📌 Key Features & Engineering Concerns
+## Description
 
-1. Core Banking Operations: 
-    - Account registration and authentication
-    - Deposit, withdraw, and transfer funds between accounts
-    - Balance inquiry and transaction history tracking
+This project is a simplified banking system designed to implement core backend engineering concepts commonly used in production-grade financial systems.
 
-2. Consistency & Concurrency Control
-    - Prevents race conditions when updating balances
-    - Ensures safe and atomic money transfers
-    - Handles multiple requests on the same account correctly
+The focus is not only on basic banking operations, but also on event-driven architecture, audit traceability, concurrency control, and system reliability — the kind of concerns that separate a working system from a production-grade one.
 
-3. Queue-Based Processing
-    - Asynchronous processing of transactions using job queues
-    - Decoupling request handling from heavy operations
-    - Improving system scalability and reliability under load
-    - Retry mechanisms for failed transactions
+---
 
-4. Audit & Transaction Traceability
-    - Audit logging for all financial operations
-    - Immutable transaction history for accountability
-    - Tracking state changes over time
+## Key Features & Engineering Concerns
 
-5. Performance & Query Optimization
-    - Efficient database queries for balance and history retrieval
-    - Index-aware data modeling for transactional tables
+**1. Core Banking Operations**
+- Account registration and authentication
+- Deposit, withdraw, and transfer funds between accounts
+- Balance inquiry and transaction history tracking
 
-6. Clean Architecture & Code Quality
-    - Modular and scalable system design
-    - Separation of concerns between services and modules
-    - Maintainable business logic layer
-    - Focus on testability and future extensibility
+**2. Event-Driven Architecture**
+- Domain events emitted after every state-changing operation
+- Fully decoupled side effects — audit and queue listen independently
+- New features attach as listeners without modifying existing code
+- Events are self-contained and emitted only after DB commit
 
+**3. Audit & Traceability**
+- Immutable audit log driven by domain events
+- Every financial operation produces a traceable record with before/after snapshots
+- Failed attempts logged alongside successful ones
+- Append-only — audit records are never updated or deleted
 
-## TO-DO list
+**4. Consistency & Concurrency Control**
+- Pessimistic locking (`SELECT FOR UPDATE`) prevents race conditions on account balances
+- Atomic money transfers using DB transactions
+- Idempotency keys protect against duplicate processing on client retries
+- `balance_before` / `balance_after` snapshots on every transaction record
+
+**5. Queue-Based Processing**
+- Asynchronous post-transfer processing using BullMQ job queues
+- Decoupling HTTP request handling from slow/external operations
+- Automatic retry with exponential backoff on failure
+- Notification and fraud check simulation as async processors
+
+**6. Performance & Query Optimization**
+- Composite and partial indexes on the heaviest-read tables
+- Integer-based monetary storage (`BIGINT`) — no float arithmetic anywhere
+- Efficient queries for balance lookup and transaction history
+
+**7. Clean Architecture**
+- Four clear layers: HTTP modules, domain, infrastructure, shared common
+- Dependency direction enforced — domain never imports from infrastructure
+- Each layer has a single, well-defined responsibility
+- Designed for testability and future extensibility
+
+---
+
+## TO-DO List
 
 ```
 - [✅] Phase 1 — Foundation
         ├── project skeleton
         ├── packages
         ├── database config + docker
-        └── entities + migrations
+        ├── entities + migrations
         ├── Swagger / OpenAPI documentation
         └── repository layer separated from services
 
@@ -62,7 +81,7 @@ This project is a simplified banking system designed to implement core backend e
 - [✅] Phase 4 — Transactions
         ├── deposit
         ├── withdraw
-        └── transfer (sync for now, queue in phase 7)
+        └── transfer
 
 - [✅] Phase 5 — Read Operations
         ├── my accounts
@@ -70,83 +89,83 @@ This project is a simplified banking system designed to implement core backend e
         ├── transaction history with pagination
         └── transaction receipt
 
-- [ ] Phase 6 — Event System
+- [✅] Phase 6 — Event System
         ├── define domain events
         ├── emit from LedgerService after commit
         ├── AuditListener → writes audit_logs
-        └── QueueListener → pushes to Bull
+        └── QueueListener → pushes to BullMQ
 
-- [ ] Phase 7 — Async Queue
-        └── TransferProcessor (retry, failure handling)
+- [✅] Phase 7 — Async Queue
+        └── TransferProcessor
+              ├── notification simulation
+              └── fraud check simulation
 
+- [ ] Phase 8 — Testing
+        ├── unit tests for domain logic
+        ├── unit tests for auth service
+        └── unit tests for queue processor
 ```
-## System Overview
 
-These diagrams show the main flows of the system and how its parts interact with each other.
+
+## System Overview
 
 ### Use Case Diagram
 <img src="./docs/diagrams/use_case.png" width="400" />
 
-### Sequence diagram Flows
+### Sequence Diagram Flows
 
-See Transfer flow here: [`docs/diagrams/transfer_seq_diagram.png`](docs/diagrams/transfer_seq_diagram.png)
+| Flow | Diagram |
+|---|---|
+| Deposit | [`docs/diagrams/deposit_seq_diagram.png`](docs/diagrams/deposit_seq_diagram.png) |
+| Withdraw | [`docs/diagrams/withdraw_seq_diagram.png`](docs/diagrams/withdraw_seq_diagram.png) |
+| Transfer | [`docs/diagrams/transfer_seq_diagram.png`](docs/diagrams/transfer_seq_diagram.png) |
 
-See Deposit flow here: [`docs/diagrams/deposit_seq_diagram.png`](docs/diagrams/deposit_seq_diagram.png)
+> PlantUML source files for all diagrams are in `/docs/plantuml/`
 
-See Withdraw flow here: [`docs/diagrams/withdraw_seq_diagram.png`](docs/diagrams/withdraw_seq_diagram.png)
-
-
-*🌟 You can see diagrams and `puml` files of them in `/dos` directory.*
-
-
+---
 
 ## Project Structure
 
 The project follows a strict layered architecture. The dependency direction always points inward: `modules` → `domain` → never back out.
-```
 
-├── src
-│   ├── app.module.ts
-│   ├── common                       
-│   │   ├── constants
-│   │   ├── decorators
-│   │   ├── filters
-│   │   ├── guards
-│   │   ├── interceptors
-│   │   ├── interfaces
-│   │   ├── pipes
-│   │   ├── types
-│   │   └── utils
-│   ├── configs
-│   ├── domain
-│   │   ├── banking-core
-│   │   └── events
-│   ├── infrastructure
-│   │   ├── audit
-│   │   │   ├── audit.listener.ts
-│   │   │   ├── audit.module.ts
-│   │   │   └── audit.service.ts
-│   │   ├── database
-│   │   │   ├── database.module.ts
-│   │   │   ├── entities
-│   │   │   ├── migrations
-│   │   │   ├── repositories
-│   │   │   └── seeds
-│   │   │       └── currencies.seed.ts
-│   │   ├── http
-│   │   │   └── swagger
-│   │   └── queue
-│   ├── main.ts
-│   └── modules
-│       ├── account
-│       ├── auth
-│       └── transaction
-│           ├── deposit
-│           ├── transaction.module.ts
-│           ├── transfer
-│           └── withdraw
 ```
-
+src/
+├── common/                        # Shared NestJS building blocks, no business logic
+│   ├── constants/
+│   ├── decorators/                # @CurrentUser(), @IpAddress()
+│   ├── filters/                   # Global exception filters
+│   ├── guards/                    # JwtAuthGuard
+│   ├── interceptors/
+│   ├── interfaces/
+│   ├── pipes/
+│   ├── types/
+│   └── utils/
+│
+├── configs/                       # Environment variable configuration
+│
+├── domain/                        # Business rules — no HTTP, no DB, no external deps
+│   ├── banking-core/              # LedgerService, lock, validator, recorder
+│   └── events/                    # Domain event definitions (plain TS classes)
+│
+├── infrastructure/                # Adapters for external systems
+│   ├── audit/                     # AuditService + AuditListener
+│   ├── database/
+│   │   ├── entities/
+│   │   ├── migrations/
+│   │   ├── repositories/
+│   │   └── seeds/
+│   ├── http/
+│   │   └── swagger/
+│   └── queue/                     # QueueListener + TransferProcessor
+│
+└── modules/                       # HTTP feature modules (controllers + use-case services)
+    ├── account/
+    ├── auth/
+    └── transaction/
+        ├── deposit/
+        ├── transfer/
+        └── withdraw/
+```
 
 ### Layer responsibilities at a glance
 
@@ -157,41 +176,46 @@ The project follows a strict layered architecture. The dependency direction alwa
 | `infrastructure/` | ❌ | ✅ | ❌ | ✅ |
 | `common/` | ❌ | ❌ | ❌ | ❌ |
 
+---
 
 ## Data Model
 
-The schema is designed around immutability and extensibility. Financial records are never updated or deleted — only appended. See [`docs/database/schema.md`](docs/database/schema.md) for the full design and all decisions.
+The schema is designed around immutability and extensibility. Financial records are never updated or deleted.
+
+only appended. 
+
+See [`docs/database/schema.md`](docs/database/schema.md) for the full design and all decisions.
+
+![ERD](docs/database/schema.png)
+
 
 
 ## API Reference
 
-The API is documented with Swagger and available at:
-
-- `http://localhost:3000/docs`
-
+The API is documented with Swagger and available at `http://localhost:3000/docs`
 
 <img src="./docs/api/image.png" width="400" />
 
-ALL APIS:
-
 ```
-✅ POST   /auth/register
-✅ POST   /auth/login
-✅ GET    /auth/me
+POST   /auth/register
+POST   /auth/login
+GET    /auth/me
 
-✅ GET    /accounts/my
-✅ GET    /accounts/:accountId/balance
+GET    /accounts/my
+GET    /accounts/:accountId/balance
 
-✅ POST   /transaction/deposit
-✅ POST   /transaction/withdraw
-✅ POST   /transaction/transfer
-✅ GET    /transaction/history?page=1&limit=20
-✅ GET    /transaction/:transactionId/receipt
+POST   /transaction/deposit
+POST   /transaction/withdraw
+POST   /transaction/transfer
+GET    /transaction/history?page=1&limit=20
+GET    /transaction/:transactionId/receipt
 ```
 
-All protected APIs require a JWT bearer token.
+All protected routes require a JWT bearer token.
 
-All responses use the same response envelope:
+### Response envelope
+
+All responses follow a consistent shape:
 
 ```json
 {
@@ -202,8 +226,6 @@ All responses use the same response envelope:
   "error": null
 }
 ```
-
-Error responses keep the same shape:
 
 ```json
 {
@@ -218,185 +240,125 @@ Error responses keep the same shape:
 }
 ```
 
-### Auth APIs
+### Auth
 
-`POST /auth/register`
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/auth/register` | Creates a new user and default account in one DB transaction |
+| POST | `/auth/login` | Validates credentials, returns JWT access token |
+| GET | `/auth/me` | Returns the authenticated user profile |
 
-Creates a new user and default account inside one database transaction.
+### Accounts
 
-`POST /auth/login`
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/accounts/my` | Returns all accounts owned by the authenticated user |
+| GET | `/accounts/:accountId/balance` | Returns balance for one owned account |
 
-Validates credentials and returns a JWT access token.
+### Transactions
 
-`GET /auth/me`
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/transaction/deposit` | Deposits funds into an owned account |
+| POST | `/transaction/withdraw` | Withdraws funds after balance validation |
+| POST | `/transaction/transfer` | Transfers funds between accounts |
+| GET | `/transaction/history` | Paginated transaction history |
+| GET | `/transaction/:transactionId/receipt` | Receipt for a single transaction |
 
-Returns the authenticated user profile. Account details are handled by the account APIs.
-
-### Account APIs
-
-`GET /accounts/my`
-
-Returns all accounts owned by the authenticated user.
-
-`GET /accounts/:accountId/balance`
-
-Returns the balance for one owned account.
-
-### Transaction APIs
-
-`POST /transaction/deposit`
-
-Deposits funds into an owned account.
-
-`POST /transaction/withdraw`
-
-Withdraws funds from an owned account after balance validation.
-
-`POST /transaction/transfer`
-
-Transfers funds from an owned source account to another account.
-
-`GET /transaction/history?page=1&limit=20`
-
-Returns paginated transaction history for all accounts owned by the authenticated user.
-
-`GET /transaction/:transactionId/receipt`
-
-Returns the receipt for a transaction that belongs to the authenticated user.
 
 ## Running the Project
-
-You can run the project in two ways:
-
-- with Docker for PostgreSQL and Redis
-- without Docker if you already have the required services running locally
 
 ### Prerequisites
 
 - Node.js 20+
 - npm
-- PostgreSQL
-- Redis
+- Docker (for PostgreSQL and Redis)
 
-### Environment
-
-Create a `.env` file from `.env.example` and fill in the values for:
-
-- `DB_HOST`
-- `DB_PORT`
-- `DB_NAME`
-- `DB_USERNAME`
-- `DB_PASSWORD`
-- `JWT_SECRET`
-- `JWT_EXPIRES_IN`
-- `REDIS_HOST`
-- `REDIS_PORT`
-
-### Run With Docker
-
-Start the infrastructure:
+### Environment setup
 
 ```bash
+cp .env.example .env
+```
+
+Fill in the values in `.env`:
+
+```
+DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD
+JWT_SECRET, JWT_EXPIRES_IN
+REDIS_HOST, REDIS_PORT
+```
+
+### With Docker
+
+```bash
+# start PostgreSQL and Redis
 docker compose up -d postgres redis
-```
 
-Run migrations:
-
-```bash
+# run migrations
 npm run migration:run
-```
 
-Seed currencies:
-
-```bash
+# seed currencies
 npm run seed:currencies
-```
 
-Start the app:
-
-```bash
+# start the app
 npm run start:dev
 ```
 
-### Run Without Docker
+### Without Docker
 
-If PostgreSQL and Redis are already available on your machine:
-
-1. Update `.env` so `DB_HOST`, `DB_PORT`, `REDIS_HOST`, and `REDIS_PORT` point to your local services.
-2. Run migrations:
+If PostgreSQL and Redis are already running locally, update `.env` to point to them, then:
 
 ```bash
 npm run migration:run
-```
-
-3. Seed currencies:
-
-```bash
 npm run seed:currencies
-```
-
-4. Start the app:
-
-```bash
 npm run start:dev
 ```
 
 
 ## Database Migrations
 
-The project uses TypeORM migrations for schema management.
-
-### Create a migration
-
 ```bash
-npm run migration:create --name=your_migration_name
-```
+# generate a migration from entity changes
+npm run migration:generate -- src/infrastructure/database/migrations/your_name
 
-### Run migrations
-
-```bash
+# run pending migrations
 npm run migration:run
-```
 
-### Revert the last migration
-
-```bash
+# revert the last migration
 npm run migration:revert
-```
 
-### Seed reference data
-
-Currency rows are seeded separately:
-
-```bash
+# seed currencies
 npm run seed:currencies
 ```
 
+> Never edit a migration that has already been run. Never delete migration files.
+
+---
 
 ## Testing
 
-> 🚧 Will cover unit tests for domain logic, integration tests for API endpoints, and concurrency scenario testing.
+> 🚧 In progress. Will cover unit tests for domain logic, auth service, and queue processor.
 
+---
 
 ## Deployment
 
 > 🚧 Will cover Docker image build, environment configuration, and production concerns.
 
+---
 
 ## Tech Stack
 
 | Layer | Technology |
 |---|---|
-| Runtime | Node.js |
+| Runtime | Node.js 20 |
 | Framework | NestJS |
 | Language | TypeScript |
 | Database | PostgreSQL |
 | ORM | TypeORM |
-| Queue | Bull (Redis) |
+| Queue | BullMQ (Redis) |
 | Events | @nestjs/event-emitter |
 | Auth | JWT / Passport |
 | Logging | Pino |
 | Containerization | Docker |
 | API Documentation | Swagger |
-
-
